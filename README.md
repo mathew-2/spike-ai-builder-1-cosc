@@ -108,14 +108,6 @@ spike-ai-builder/
 
 ---
 
-## Features
-
-| Tier | Feature | Status |
-|------|---------|--------|
-| 1 | GA4 Analytics Agent | Complete |
-| 2 | SEO Agent (Screaming Frog) | Complete |
-| 3 | Multi-Agent Orchestrator | Complete |
-
 ### Key Capabilities
 - Natural language query understanding via LLM
 - Live data from GA4 API and Google Sheets
@@ -183,7 +175,3 @@ curl -X POST http://localhost:8080/query \
 - All queries are in English
 
 ---
-
-## Author
-
-Built for Spike AI Builder Hackathon
