@@ -30,6 +30,7 @@ class SEOConfig:
     """Configuration for SEO data source."""
     spreadsheet_url: str
     spreadsheet_id: str
+    credentials_path: Path
 
 
 @dataclass
@@ -66,7 +67,14 @@ def load_config() -> AppConfig:
         ),
         seo=SEOConfig(
             spreadsheet_url=os.getenv("SEO_SPREADSHEET_URL", ""),
-            spreadsheet_id=os.getenv("SEO_SPREADSHEET_ID", "1zzf4ax_H2WiTBVrJigGjF2Q3Yz-qy2qMCbAMKvl6VEE"),
+            spreadsheet_id=os.getenv(
+                "SEO_SPREADSHEET_ID",
+                "1zzf4ax_H2WiTBVrJigGjF2Q3Yz-qy2qMCbAMKvl6VEE"
+            ),
+            credentials_path=project_root / os.getenv(
+                "SEO_CREDENTIALS_PATH",
+                "credentials.json"
+            ),
         ),
         server=ServerConfig(
             host=os.getenv("SERVER_HOST", "0.0.0.0"),

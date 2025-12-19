@@ -7,3 +7,4 @@ google-auth
 google-analytics-data
 openai
 pandas
+google-api-python-client

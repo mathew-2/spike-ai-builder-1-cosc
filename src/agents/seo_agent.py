@@ -7,6 +7,10 @@ from .base import BaseAgent, AgentResponse
 from src.config import config
 from src.utils import llm_client
 
+import time
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
 logger = logging.getLogger(__name__)
 
 
@@ -96,14 +100,39 @@ class SEOAgent(BaseAgent):
         try:
             spreadsheet_id = config.seo.spreadsheet_id
             
-            # Construct the CSV export URL for the first sheet
-            csv_url = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/export?format=csv&gid=1438203274"
+
+            logger.info(f"Using SEO credentials at: {config.seo.credentials_path}")
+        
+            # Use service account credentials
+            credentials = service_account.Credentials.from_service_account_file(
+                str(config.seo.credentials_path),
+                scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
+            )
             
-            logger.info(f"Loading SEO data from Google Sheets: {spreadsheet_id}")
+            # Build the Sheets API service
+            service = build('sheets', 'v4', credentials=credentials)
             
-            # Load data using pandas
-            df = pd.read_csv(csv_url)
+            # Get all data from the first sheet
+            result = service.spreadsheets().values().get(
+                spreadsheetId=spreadsheet_id,
+                range='Sheet1!A1:ZZ'  # Get all columns
+            ).execute()
             
+            values = result.get('values', [])
+
+            logger.info(f"Sheets API response keys: {result.keys()}")
+            logger.info(f"Rows returned from Sheets API: {len(values)}")
+            
+            if not values:
+                logger.warning("No data found in spreadsheet")
+                return None
+            
+            # Convert to DataFrame (first row as headers)
+            headers = values[0]
+            data = values[1:]
+
+            df = pd.DataFrame(data, columns=headers)
+
             # Clean column names
             df.columns = df.columns.str.strip()
             
@@ -113,11 +142,11 @@ class SEOAgent(BaseAgent):
             
             logger.info(f"Loaded {len(df)} rows with columns: {df.columns.tolist()}")
             return df
-            
+                
         except Exception as e:
             logger.error(f"Failed to load SEO data: {e}")
             return None
-    
+
     async def _parse_query(self, query: str, columns: list) -> dict:
         """Use LLM to parse the SEO query into an analysis plan."""
         system_prompt = f"""You are an SEO data analyst. Parse the user's query to determine what analysis to perform.
@@ -137,7 +166,7 @@ Return ONLY valid JSON in this format:
 {{
     "operation": "filter|group|aggregate|count|list",
     "filters": [
-        {{"column": "column_name", "operator": "equals|contains|greater|less|not_equals|is_empty|not_empty", "value": "value"}}
+        {{"column": "column_name", "operator: equals|contains|not_contains|greater|less|not_equals|is_empty|not_empty", "value": "value"}}
     ],
     "group_by": "column_name or null",
     "aggregation": "count|sum|mean|null",
