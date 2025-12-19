@@ -166,12 +166,3 @@ curl -X POST http://localhost:8080/query \
 ```
 
 ---
-
-## Assumptions
-
-- GA4 credentials are valid and have Analytics Viewer permissions
-- SEO spreadsheet is publicly accessible
-- LiteLLM API key has sufficient budget
-- All queries are in English
-
----
