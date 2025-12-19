@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+httpx
+google-auth
+google-analytics-data
+openai
+pandas
